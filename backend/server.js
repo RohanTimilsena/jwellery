@@ -2,6 +2,12 @@ import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import { v2 as cloudinary } from "cloudinary";
+import bcrypt from "bcrypt";
+
+import jwt from "jsonwebtoken";
+
+const saltRounds = 10;
+
 import multer from "multer";
 const upload = multer({ dest: "uploads/" });
 
@@ -53,6 +59,18 @@ const bannerSchema = new mongoose.Schema({
 
 // Banner Table
 const BannerTable = mongoose.model("BannerTable", bannerSchema);
+
+// User Schema
+const userSchema = new mongoose.Schema({
+  fullName: { type: String, required: true },
+  userName: { type: String, required: true, unique: true },
+  email: { type: String, required: true, unique: true },
+  phoneNumber: { type: Number, required: true, unique: true },
+  password: { type: String, required: true },
+  role: { type: String, required: true }, //  admin , user
+});
+
+const UserTable = mongoose.model("UserTable", userSchema);
 
 // product schema
 const productSchema = new mongoose.Schema({
@@ -319,7 +337,6 @@ app.delete("/api/banner/:id", async (req, res) => {
 
 // product route
 
-
 app.post("/api/products", upload.single("imageUrl"), async (req, res) => {
   console.log(req.file);
 
@@ -363,7 +380,6 @@ app.post("/api/products", upload.single("imageUrl"), async (req, res) => {
     });
   }
 });
-
 
 // get all products
 app.get("/api/products", async (req, res) => {
@@ -436,7 +452,6 @@ app.patch("/api/products/:id", upload.single("imageUrl"), async (req, res) => {
       });
     }
 
-
     // if user not upload new image
     const updatedProduct = await ProductTable.findByIdAndUpdate(
       req.params.id,
@@ -479,6 +494,248 @@ app.delete("/api/products/:id", async (req, res) => {
       success: false,
       msg: "Something went wrong",
       data: null,
+      error: error,
+    });
+  }
+});
+
+// User Routes
+// 1. create/Register/Signup user
+// app.post("/api/users/register", async (req, res) => {
+//   try {
+//     const userExistWithEmail = await UserTable.findOne({
+//       email: req.body.email,
+//     });
+//     if (userExistWithEmail) {
+//       return res.status(409).json({
+//         success: false,
+//         msg: "User already exist with this email please chose another email ",
+//         data: null,
+//       });
+//     }
+
+//     const userExistWithUsername = await UserTable.findOne({
+//       userName: req.body.userName,
+//     });
+//     if (userExistWithUsername) {
+//       return res.status(409).json({
+//         success: false,
+//         msg: "Username already taken  please chose another userName ",
+//         data: null,
+//       });
+//     }
+
+//     const userExistWithPhoneNumber = await UserTable.findOne({
+//       phoneNumber: req.body.phoneNumber,
+//     });
+//     if (userExistWithPhoneNumber) {
+//       return res.status(409).json({
+//         success: false,
+//         msg: "Phone number already taken  please chose another phone number ",
+//         data: null,
+//       });
+//     }
+
+//     const saltRounds = 10;
+//     const salt = bcrypt.genSaltSync(saltRounds);
+//     const hashedPassword = bcrypt.hashSync(req.body.password, salt);
+//     console.log(hashedPassword);
+
+//     const newlyCreatedUser = await UserTable.create({
+//       ...req.body,
+//       password: hashedPassword,
+//     });
+//     return res.status(201).json({
+//       success: true,
+//       msg: "You have been registered successfully",
+//       data: newlyCreatedUser,
+//     });
+//   } catch (error) {
+//     return res.status(500).json({
+//       success: false,
+//       msg: "Something went wrong",
+//       data: null,
+//       error: error,
+//     });
+//   }
+// });
+
+app.post("/api/users/register", async (req, res) => {
+  try {
+    // if email already exists
+    const userExistWithEmail = await UserTable.findOne({
+      email: req.body.email,
+    });
+    if (userExistWithEmail) {
+      return res.status(409).json({
+        success: false,
+        msg: "User with this email already exists, please use a different email",
+        data: null,
+      });
+    }
+    // if username already exists
+    const userExistWithUserName = await UserTable.findOne({
+      userName: req.body.userName,
+    });
+    if (userExistWithUserName) {
+      return res.status(409).json({
+        success: false,
+        msg: "User with this username already exists, please use a different username",
+        data: null,
+      });
+    }
+    // if phone number already exists
+    const userExistWithPhoneNumber = await UserTable.findOne({
+      phoneNumber: req.body.phoneNumber,
+    });
+    if (userExistWithPhoneNumber) {
+      return res.status(409).json({
+        success: false,
+        msg: "User with this phone number already exists, please use a different phone number",
+        data: null,
+      });
+    }
+
+    //To hash password
+    const salt = bcrypt.genSaltSync(saltRounds);
+    const hashPassword = bcrypt.hashSync(req.body.password, salt);
+
+    const newlycreatedUser = await UserTable.create({
+      ...req.body,
+      password: hashPassword,
+    });
+    return res.status(201).json({
+      success: true,
+      msg: "You have been register successfully",
+      data: newlycreatedUser,
+    });
+  } catch (error) {
+    re.status(500).json({
+      success: false,
+      msg: "Something went wrong",
+      data: null,
+      error,
+    });
+  }
+});
+
+// 2. Login/Sign  User
+app.post("/api/users/login", async (req, res) => {
+  try {
+    const userExist = await UserTable.findOne({ email: req.body.email });
+    if (!userExist) {
+      return res.status(404).json({
+        success: false,
+        msg: "please register befor login ",
+        data: null,
+      });
+    }
+
+    const passwordMatch = await bcrypt.compare(
+      req.body.password,
+      userExist.password
+    );
+
+    if (!passwordMatch) {
+      return res.status(401).json({
+        success: false,
+        msg: "Incorrect password",
+        data: null,
+      });
+    }
+
+    const myToken = jwt.sign({ data: req.body.email }, "asdfghjkl0", {
+      expiresIn: "24h",
+    });
+    return res.status(200).json({
+      success: true,
+      msg: "Login successfully",
+      token: myToken,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      msg: "Something went wrong",
+      data: null,
+      error: error,
+    });
+  }
+});
+
+// 3. Update user
+app.patch("/api/users/update/:id", async (req, res) => {
+  try {
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      msg: "Something went wrong",
+      data: null,
+      error: error,
+    });
+  }
+});
+
+// 4. Delete User
+app.delete("/api/users/delete/:id", async (req, res) => {
+  try {
+    const deletedUser = await UserTable.findByIdAndDelete(req.params.id);
+
+    if (!deletedUser) {
+      return res.status(404).json({
+        success: false,
+        msg: "User not found",
+        data: null,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      msg: " user deleted successfully",
+      data: deletedUser,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      msg: "Something went wrong",
+      data: null,
+      error: error,
+    });
+  }
+});
+
+// 5. Get all user
+app.get("/api/users", async (req, res) => {
+  try {
+    const allUsers = await UserTable.find();
+    return res.status(200).json({
+      success: true,
+      msg: "  All user get success ",
+      data: allUsers,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      data: null,
+      msg: "something went wrong",
+      error: error,
+    });
+  }
+});
+
+// 6. get single
+app.get("/api/users/:id", async (req, res) => {
+  try {
+    const singleUser = await UserTable.findById(req.params.id);
+    return res.status(200).json({
+      success: true,
+      data: singleUser,
+      msg: " Get Single user  success ",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      data: null,
+      msg: "something went wrong",
       error: error,
     });
   }
