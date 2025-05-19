@@ -1,7 +1,9 @@
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
+
 import { v2 as cloudinary } from "cloudinary";
+
 import bcrypt from "bcrypt";
 
 import jwt from "jsonwebtoken";
@@ -336,10 +338,7 @@ app.delete("/api/banner/:id", async (req, res) => {
 });
 
 // product route
-
 app.post("/api/products", upload.single("imageUrl"), async (req, res) => {
-  console.log(req.file);
-
   try {
     const productAlreadyExist = await ProductTable.findOne({
       name: req.body.name,
@@ -501,65 +500,6 @@ app.delete("/api/products/:id", async (req, res) => {
 
 // User Routes
 // 1. create/Register/Signup user
-// app.post("/api/users/register", async (req, res) => {
-//   try {
-//     const userExistWithEmail = await UserTable.findOne({
-//       email: req.body.email,
-//     });
-//     if (userExistWithEmail) {
-//       return res.status(409).json({
-//         success: false,
-//         msg: "User already exist with this email please chose another email ",
-//         data: null,
-//       });
-//     }
-
-//     const userExistWithUsername = await UserTable.findOne({
-//       userName: req.body.userName,
-//     });
-//     if (userExistWithUsername) {
-//       return res.status(409).json({
-//         success: false,
-//         msg: "Username already taken  please chose another userName ",
-//         data: null,
-//       });
-//     }
-
-//     const userExistWithPhoneNumber = await UserTable.findOne({
-//       phoneNumber: req.body.phoneNumber,
-//     });
-//     if (userExistWithPhoneNumber) {
-//       return res.status(409).json({
-//         success: false,
-//         msg: "Phone number already taken  please chose another phone number ",
-//         data: null,
-//       });
-//     }
-
-//     const saltRounds = 10;
-//     const salt = bcrypt.genSaltSync(saltRounds);
-//     const hashedPassword = bcrypt.hashSync(req.body.password, salt);
-//     console.log(hashedPassword);
-
-//     const newlyCreatedUser = await UserTable.create({
-//       ...req.body,
-//       password: hashedPassword,
-//     });
-//     return res.status(201).json({
-//       success: true,
-//       msg: "You have been registered successfully",
-//       data: newlyCreatedUser,
-//     });
-//   } catch (error) {
-//     return res.status(500).json({
-//       success: false,
-//       msg: "Something went wrong",
-//       data: null,
-//       error: error,
-//     });
-//   }
-// });
-
 app.post("/api/users/register", async (req, res) => {
   try {
     // if email already exists
@@ -665,6 +605,35 @@ app.post("/api/users/login", async (req, res) => {
 // 3. Update user
 app.patch("/api/users/update/:id", async (req, res) => {
   try {
+    // user trying to change password also
+    if (req.body.password) {
+      //To hash password
+      const salt = bcrypt.genSaltSync(saltRounds);
+      const newHashedPassword = bcrypt.hashSync(req.body.password, salt);
+
+      const updatedUser = await UserTable.findByIdAndUpdate(
+        req.params.id,
+        { ...req.body, password: newHashedPassword },
+        { new: true }
+      );
+      return res.status(200).json({
+        success: true,
+        msg: " user bupdated successfully",
+        data: updatedUser,
+      });
+    }
+
+    // if user does not want to change password
+    const updatedUser = await UserTable.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
+    return res.status(200).json({
+      success: true,
+      msg: " user bupdated successfully",
+      data: updatedUser,
+    });
   } catch (error) {
     return res.status(500).json({
       success: false,
