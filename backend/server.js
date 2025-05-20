@@ -94,6 +94,9 @@ const ProductTable = mongoose.model("ProductTable", productSchema);
 
 // Category Routes
 // create
+
+
+//Create
 app.post("/api/category", upload.single("imageUrl"), async (req, res) => {
   try {
     const categoryAlreadyExist = await CategoryTable.findOne({
@@ -102,39 +105,42 @@ app.post("/api/category", upload.single("imageUrl"), async (req, res) => {
     if (categoryAlreadyExist) {
       return res.status(409).json({
         success: false,
+        msg: " Name of category already exists",
         data: null,
-        msg: " Name already exixt ",
       });
     }
     console.log(req.file);
 
-    // Image uplode functionality
+    //Upload image to Cloudinary
+
     const uploadResult = await cloudinary.uploader
       .upload(req.file.path)
       .catch((error) => {
         return res.status(500).json({
           success: false,
-          data: null,
           msg: "Image upload failed",
-          error: error,
+          data: null,
+          error,
         });
       });
+    console.log(uploadResult.secure_url);
 
     const newlyCreatedCategory = await CategoryTable.create({
       ...req.body,
       imageUrl: uploadResult.secure_url,
     });
+
     return res.status(201).json({
       success: true,
+      msg: "Category created successfully",
       data: newlyCreatedCategory,
-      msg: " Category created successfully ",
     });
   } catch (error) {
     return res.status(500).json({
       success: false,
+      msg: "Something went wrong",
       data: null,
-      msg: "something went wrong",
-      error: error,
+      error,
     });
   }
 });
