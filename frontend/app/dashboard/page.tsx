@@ -1,7 +1,7 @@
 "use client";
 
 import axios from "axios";
-import React, { FormEvent, ReactElement, useState } from "react";
+import React, {useState } from "react";
 import toast from "react-hot-toast";
 
 export default function DashboardPage() {
@@ -105,7 +105,7 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="w-8/12 mx-auto mt-12 mb-12 space-y-12">
+    <div className="w-9/12 mx-auto mt-12 mb-12 space-y-12">
       {/* banner create card */}
       <form
         onSubmit={createBanner}

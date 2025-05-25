@@ -14,7 +14,7 @@ export default function Footer() {
   return (
     <footer className="w-full ">
       {/* Country Navigation */}
-      <div className="bg-gray-50 py-4 w-8/12 mx-auto">
+      <div className="bg-gray-50 py-4 w-9/12 mx-auto">
         <div className="container mx-auto flex flex-wrap justify-center divide-x divide-gray-300">
           <Link href="#" className="px-4 text-gray-700 hover:text-gray-900">
             Canada
@@ -38,7 +38,7 @@ export default function Footer() {
       </div>
 
       {/* Main Footer */}
-      <div className="bg-white py-16 w-8/12 mx-auto">
+      <div className="bg-white py-16 w-9/12 mx-auto">
         <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="space-y-6">

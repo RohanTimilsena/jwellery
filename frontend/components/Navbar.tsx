@@ -20,7 +20,7 @@ export default function Navbar() {
     <header className="w-full mb-12">
       {/* Top bar */}
       <div className="bg-black ">
-        <div className="w-8/12 mx-auto  text-white py-2.5 px-4 flex justify-between items-center text-sm">
+        <div className="w-9/12 mx-auto  text-white py-2.5 px-4 flex justify-between items-center text-sm">
           <div className="flex items-center space-x-6">
             <div className="flex items-center space-x-3">
               <svg
@@ -84,7 +84,7 @@ export default function Navbar() {
         </div>
       </div>
       {/* Main header */}
-      <div className=" w-8/12 mx-auto py-4 px-4 flex justify-between items-center border-b border-gray-200">
+      <div className=" w-9/12 mx-auto py-4 px-4 flex justify-between items-center border-b border-gray-200">
         {/* Search */}
         <div className="relative w-64">
           <input
@@ -128,7 +128,7 @@ export default function Navbar() {
         </div>
       </div>
       {/* Navigation */}
-      <nav className="  w-8/12 mx-auto flex  items-center px-4 py-3 gap-30 cursor-pointer ">
+      <nav className="  w-9/12 mx-auto flex  items-center px-4 py-3 gap-30 cursor-pointer ">
         <div className="flex items-center mr-8">
           <Menu className="w-5 h-5 mr-2" />
           <span className="font-medium ">All Categories</span>

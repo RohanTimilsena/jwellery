@@ -33,7 +33,7 @@ export default function page() {
   }, []);
 
   return (
-    <div className="w-8/12 mx-auto">
+    <div className="w-9/12 mx-auto">
       <>
         <Swiper
           pagination={{

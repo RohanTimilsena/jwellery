@@ -35,7 +35,7 @@ export default function ProductsPage() {
   }, []);
 
   return (
-    <div className=" w-8/12 mx-auto  grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mt-10 mb-12">
+    <div className=" w-9/12 mx-auto  grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mt-10 mb-12">
       {products?.map((product: Iproduct, index: number) => (
         <div key={index}>
           <Image
