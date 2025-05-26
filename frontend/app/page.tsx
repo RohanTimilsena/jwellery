@@ -13,7 +13,7 @@ interface IBanner {
   imageUrl: string;
 }
 
-export default function page() {
+export default function Page() {
   const [banners, setBanners] = useState<IBanner[]>([]);
 
   // fetch all banners from server
