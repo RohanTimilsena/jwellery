@@ -47,7 +47,7 @@ export default function Page() {
               <Image
                 src={banner.imageUrl}
                 height={100}
-                width={200}
+                width={2000}
                 alt="banner-image"
               />
             </SwiperSlide>
