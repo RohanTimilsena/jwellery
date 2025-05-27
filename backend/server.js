@@ -556,7 +556,7 @@ app.post("/api/users/register", async (req, res) => {
       data: newlycreatedUser,
     });
   } catch (error) {
-    re.status(500).json({
+    res.status(500).json({
       success: false,
       msg: "Something went wrong",
       data: null,
