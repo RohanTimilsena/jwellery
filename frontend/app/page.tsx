@@ -33,27 +33,30 @@ export default function Page() {
   }, []);
 
   return (
-    <div className="w-9/12 mx-auto">
+    <div className="w-9/12 mx-auto ">
       <>
         <Swiper
           pagination={{
             dynamicBullets: true,
           }}
           modules={[Pagination]}
-          className="mySwiper "
+          className="mySwiper  "
         >
           {banners?.map((banner: IBanner, index: number) => (
             <SwiperSlide key={index}>
               <Image
                 src={banner.imageUrl}
-                height={100}
-                width={200}
+
+                height={300}
+                width={600}
                 alt="banner-image"
+                className="h-[650px] w-full object-cover rounded-lg shadow-md   "
               />
             </SwiperSlide>
           ))}
         </Swiper>
       </>
+
 
       <CategorySection />
     </div>

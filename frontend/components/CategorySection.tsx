@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-
+import Image from "next/image";
 
 interface ICategory {
   _id: string;
@@ -12,7 +12,6 @@ interface ICategory {
 export default function CategorySection() {
   const [categories, setCategories] = useState<ICategory[]>([]);
 
-  // fetch all categories function
   const fetchAllCategories = async () => {
     try {
       const response = await axios.get(
@@ -29,23 +28,22 @@ export default function CategorySection() {
   }, []);
 
   return (
-    
-
-    <div>
-      <p className="text-3xl font-medium mb-12 text-center">Explor Category</p>
-      <div className="w-10/12 mx-auto mt-20 grid grid-cols-4 items-center space-x-3">
-        {categories?.map((category: ICategory, index: number) => (
-          <div key={index} className=" space-y-2">
-            <img
-              src={category.imageUrl}
-              alt="category-image"
-              width={300}
-              height={200}
+    <section className="mt-20 px-4 md:px-8 bg-gray-50  ">
+      <h2 className="text-3xl font-semibold text-center mb-12 pt-8">Explore Category</h2>
+      <div className="max-w-7xl mx-auto     grid gap-8 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        {categories.map((category, index) => (
+          <div key={index} className="space-y-4 text-center bg-gray-100  p-3">
+            <Image
+              src={category?.imageUrl}
+              alt={category.name}
+              width={150}
+              height={100}
+              className="w-full h-[250px] object-cover rounded-xl shadow-md"
             />
-            <p className="text-center">{category.name}</p>
+            <p className="text-lg font-medium">{category.name}</p>
           </div>
         ))}
       </div>
-    </div>
+    </section>
   );
 }
