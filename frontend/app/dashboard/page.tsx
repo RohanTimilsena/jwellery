@@ -160,7 +160,8 @@ export default function DashboardPage() {
         }
       );
 
-      toast.success("Banner deleted successfully"), fetchBanners();
+      toast.success("Banner deleted successfully");
+       fetchBanners();
     } catch (error) {
       toast.error("Something went wrong while deleting the banner");
       console.log("Something went wrong", error);
@@ -206,7 +207,8 @@ export default function DashboardPage() {
         }
       );
       console.log(response);
-      toast.success("Category deleted successfully"), fetchAllCategory();
+      toast.success("Category deleted successfully");
+       fetchAllCategory();
     } catch (error) {
       toast.error("Something went wrong while deleting the banner");
       console.log("Something went wrong", error);
