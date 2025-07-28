@@ -27,7 +27,7 @@ const app = express();
 app.use(express.json());
 app.use(
   cors({
-    origin: ["http://localhost:3000","https://jwellery-h4db.vercel.app"]
+    origin: ["http://localhost:3000", "https://jwellery-h4db.vercel.app"],
   })
 );
 
@@ -92,58 +92,87 @@ const productSchema = new mongoose.Schema({
 // product Table
 const ProductTable = mongoose.model("ProductTable", productSchema);
 
-// Category Routes
-// create
+// verify token middleware
+const verifyToken = (req, res, next) => {
+  const token = req.headers["authorization"];
+  console.log(token)
 
-
-//Create
-app.post("/api/category", upload.single("imageUrl"), async (req, res) => {
-  try {
-    const categoryAlreadyExist = await CategoryTable.findOne({
-      name: req.body.name,
-    });
-    if (categoryAlreadyExist) {
-      return res.status(409).json({
-        success: false,
-        msg: " Name of category already exists",
-        data: null,
-      });
-    }
-    console.log(req.file);
-
-    //Upload image to Cloudinary
-
-    const uploadResult = await cloudinary.uploader
-      .upload(req.file.path)
-      .catch((error) => {
-        return res.status(500).json({
-          success: false,
-          msg: "Image upload failed",
-          data: null,
-          error,
-        });
-      });
-    console.log(uploadResult.secure_url);
-
-    const newlyCreatedCategory = await CategoryTable.create({
-      ...req.body,
-      imageUrl: uploadResult.secure_url,
-    });
-
-    return res.status(201).json({
-      success: true,
-      msg: "Category created successfully",
-      data: newlyCreatedCategory,
-    });
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      msg: "Something went wrong",
-      data: null,
-      error,
+  if (!token) {
+    return res.status(401).json({
+      msg: "You are not authenticated",
     });
   }
-});
+
+  const pureToken = token.split(" ")[1];
+  console.log(pureToken)
+
+  jwt.verify(pureToken, "asdfghjkl0", function (err, decoded) {
+    console.log(err)
+    console.log(decoded)
+    if (err) {
+      return res.status(403).json({
+        msg: "You are not authorized",
+      });
+    }
+    next();
+  });
+};
+
+// Category Routes
+
+//Create
+app.post(
+  "/api/category",
+  verifyToken,
+  upload.single("imageUrl"),
+  async (req, res) => {
+    try {
+      const categoryAlreadyExist = await CategoryTable.findOne({
+        name: req.body.name,
+      });
+      if (categoryAlreadyExist) {
+        return res.status(409).json({
+          success: false,
+          msg: " Name of category already exists",
+          data: null,
+        });
+      }
+      console.log(req.file);
+
+      //Upload image to Cloudinary
+
+      const uploadResult = await cloudinary.uploader
+        .upload(req.file.path)
+        .catch((error) => {
+          return res.status(500).json({
+            success: false,
+            msg: "Image upload failed",
+            data: null,
+            error,
+          });
+        });
+      console.log(uploadResult.secure_url);
+
+      const newlyCreatedCategory = await CategoryTable.create({
+        ...req.body,
+        imageUrl: uploadResult.secure_url,
+      });
+
+      return res.status(201).json({
+        success: true,
+        msg: "Category created successfully",
+        data: newlyCreatedCategory,
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        msg: "Something went wrong",
+        data: null,
+        error,
+      });
+    }
+  }
+);
 
 // get all
 app.get("/api/category", async (req, res) => {
@@ -184,7 +213,7 @@ app.get("/api/category/:id", async (req, res) => {
 });
 
 // update
-app.patch("/api/category/:id", upload.single("imageUrl"), async (req, res) => {
+app.patch("/api/category/:id", verifyToken, upload.single("imageUrl"), async (req, res) => {
   try {
     if (req.file) {
       // Image uplode functionality
@@ -232,7 +261,7 @@ app.patch("/api/category/:id", upload.single("imageUrl"), async (req, res) => {
 });
 
 // delete
-app.delete("/api/category/:id", async (req, res) => {
+app.delete("/api/category/:id", verifyToken, async (req, res) => {
   try {
     const deletedCategory = await CategoryTable.findByIdAndDelete(
       req.params.id
@@ -253,8 +282,8 @@ app.delete("/api/category/:id", async (req, res) => {
 });
 
 // banner route
-//  create
-app.post("/api/banner", upload.single("imageUrl"), async (req, res) => {
+// banner create
+app.post("/api/banner", verifyToken, upload.single("imageUrl"), async (req, res) => {
   try {
     // Image uplode functionality
     const uploadResult = await cloudinary.uploader
@@ -325,7 +354,7 @@ app.get("/api/banner/:id", async (req, res) => {
 });
 
 // banner delete
-app.delete("/api/banner/:id", async (req, res) => {
+app.delete("/api/banner/:id", verifyToken, async (req, res) => {
   try {
     const deletedBanner = await BannerTable.findByIdAndDelete(req.params.id);
     return res.status(200).json({
@@ -344,7 +373,9 @@ app.delete("/api/banner/:id", async (req, res) => {
 });
 
 // product route
-app.post("/api/products", upload.single("imageUrl"), async (req, res) => {
+
+// create product
+app.post("/api/products", verifyToken, upload.single("imageUrl"), async (req, res) => {
   try {
     const productAlreadyExist = await ProductTable.findOne({
       name: req.body.name,
@@ -432,7 +463,7 @@ app.get("/api/products/:id", async (req, res) => {
 });
 
 // update products
-app.patch("/api/products/:id", upload.single("imageUrl"), async (req, res) => {
+app.patch("/api/products/:id", verifyToken, upload.single("imageUrl"), async (req, res) => {
   try {
     //  if user upload new image
     if (req.file) {
@@ -479,7 +510,7 @@ app.patch("/api/products/:id", upload.single("imageUrl"), async (req, res) => {
 });
 
 // delete products
-app.delete("/api/products/:id", async (req, res) => {
+app.delete("/api/products/:id", verifyToken, async (req, res) => {
   try {
     const deletedProduct = await ProductTable.findByIdAndDelete(req.params.id);
     if (!deletedProduct) {
